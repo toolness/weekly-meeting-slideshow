@@ -3,11 +3,11 @@
 <meta name="author" content="Atul Varma">
 <title>Weekly Meeting Slideshow</title>
 <!-- Date: 2010-09-26 -->
+<link rel="stylesheet"
+      href="http://labs.toolness.com/moz/slides-2/screen.css">
 <style>
-body {
-  width: 40em;
-  margin: 0 auto;
-  font-family: Baskerville;
+#templates, #response {
+  display: none;
 }
 
 a {
@@ -18,20 +18,22 @@ a:hover {
   background: #f0f0f0;
 }
 
-b, h1, h2 {
+.main {
+  font-size: 18pt;
+}
+
+.main b {
   font-weight: normal;
-  font-style: italic;
+  border-bottom: 1px dotted gray;
 }
 
-#response {
-  display: none;
-}
-
-.section {
-}
-
-ul {
+.main ul {
   list-style-type: none;
+}
+
+.main ul, .main li {
+  padding-top: 0.25em;
+  padding-bottom: 0.25em;
 }
 </style>
 <script src="jquery.js"></script>
@@ -79,17 +81,24 @@ const MONTHS = [
   'December'
 ];
 
+// Taken from:
+// http://stackoverflow.com/questions/1418050/string-strip-for-javascript
+if(typeof(String.prototype.trim) === "undefined")
+{
+    String.prototype.trim = function() 
+    {
+        return String(this).replace(/^\s+|\s+$/g, '');
+    };
+}
+
 function showUpdate(date) {
   var parts = date.match(/(\d+)-(\d+)-(\d+)/);
   var realDate = new Date(parts[1], parts[2], parts[3]);
-  var title = "The Mozilla Weekly Meeting for " +
+  var title = "The Week of " +
               MONTHS[realDate.getMonth() - 1] + " " +
               realDate.getDate() + ", " + realDate.getFullYear();
-  var heading = $('<h1 class="title"></h1>');
 
   document.title = title;
-  heading.text(title);
-  $(document.body).append(heading);
 
   var url = 'http://localhost:8080/WeeklyUpdates/' + date;
   jQuery.get(url, function(html) {
@@ -97,7 +106,44 @@ function showUpdate(date) {
     $("#response").remove();
     updates.find("#S_Speakers").remove();
     updates.find("#Video_for_today\\.27s_meeting").remove();
-    $(document.body).append(updates);
+
+    var mainSection;
+    var slides = [];
+    
+    updates.find(".section").each(function() {
+      var header = $(this).find(":header:first");
+      var subheader = header.text().trim();
+
+      if ($(this).find(".section").length > 0) {
+        mainSection = subheader;
+      } else if (subheader.length > 0) {
+        if (header.get(0).nodeName == "H2")
+          subheader = mainSection + " - " + subheader;
+        var slide = $("#templates div.slide.normal").clone();
+        slide.find(".header").text(title);
+        slide.find(".subheader").text(subheader);
+        header.remove();
+        slide.find(".main").append($(this).children());
+        $(document.body).append(slide);
+        slides.push(slide);
+      }
+    });
+
+    var currSlide = 0;
+    
+    function nextSlide() {
+      if (currSlide > 0) {
+        slides[currSlide - 1].removeClass("selected");
+      }
+      slides[currSlide].addClass("selected");
+      currSlide++;
+      if (currSlide == slides.length)
+        window.clearInterval(intervalID);
+    }
+
+    var intervalID = window.setInterval(nextSlide, 5000);
+    
+    nextSlide();
   });
 }
 
@@ -108,4 +154,13 @@ $(window).ready(function() {
   showUpdate(date);
 });
 </script>
+<div id="templates">
+  <div class="normal slide"> 
+    <div class="content"> 
+      <div class="header"></div> 
+      <div class="subheader"></div> 
+      <div class="main"></div> 
+    </div>
+  </div>
+</div>
 <div id="response"></div>
