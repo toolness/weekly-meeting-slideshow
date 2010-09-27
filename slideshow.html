@@ -81,14 +81,10 @@ const MONTHS = [
 
 function showUpdate(date) {
   var parts = date.match(/(\d+)-(\d+)-(\d+)/);
-  var year = parts[1];
-  var month = parts[2];
-  var dayOfMonth = parts[3];
-  var realDate = new Date(year, month, dayOfMonth);
+  var realDate = new Date(parts[1], parts[2], parts[3]);
   var title = "The Mozilla Weekly Meeting for " +
-              MONTHS[realDate.getMonth()] +
-              " " + realDate.getDate() + ", " +
-              realDate.getFullYear();
+              MONTHS[realDate.getMonth() - 1] + " " +
+              realDate.getDate() + ", " + realDate.getFullYear();
   var heading = $('<h1 class="title"></h1>');
 
   document.title = title;
