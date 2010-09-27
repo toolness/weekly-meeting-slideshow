@@ -55,7 +55,10 @@ function massageWeeklyUpdate(doc) {
     var contents = $(heading).nextUntil(selArray.join(', '));
     var nextLvl = 'h' + (lvl + 1);
     var subsections = contents.filter(nextLvl);
+    var headingText = $(heading).text().trim();
 
+    section.attr("id", $(heading).find(".mw-headline").attr("id"));
+    $(heading).text(headingText);
     section.append($(heading).clone());
     if (subsections.length) {
       subsections.each(function() {
@@ -64,7 +67,6 @@ function massageWeeklyUpdate(doc) {
     } else
       section.append(contents.clone());
 
-    section.attr("id", "S_" + $(heading).find(".mw-headline").attr("id"));
     if (section.children().length > 1)
       return section;
     else
@@ -110,7 +112,7 @@ function showUpdate(date) {
 
     // In the future, we can show massaged information about
     // speakers, but for now just remove the table.
-    updates.find("#S_Speakers").remove();
+    updates.find("#Speakers").remove();
     
     // Just ignore the meeting video for now.
     updates.find("#Video_for_today\\.27s_meeting").remove();
@@ -120,11 +122,11 @@ function showUpdate(date) {
     
     updates.find(".section").each(function slideFromSection() {
       var header = $(this).find(":header:first");
-      var subheader = header.text().trim();
+      var subheader = header.text();
 
       if ($(this).find(".section").length > 0) {
         mainSection = subheader;
-      } else if (subheader.length > 0) {
+      } else {
         if (header.get(0).nodeName == "H2")
           subheader = mainSection + " - " + subheader;
         var slide = $("#templates div.slide.normal").clone();
