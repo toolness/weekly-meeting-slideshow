@@ -143,10 +143,9 @@ function showUpdate(date) {
     var currSlide = 0;
     
     function nextSlide() {
-      if (currSlide > 0) {
-        slides[currSlide - 1].removeClass("selected");
-      }
       slides[currSlide].addClass("selected");
+      if (currSlide > 0)
+        slides[currSlide - 1].removeClass("selected");
       currSlide++;
       if (currSlide == slides.length)
         window.clearInterval(intervalID);
