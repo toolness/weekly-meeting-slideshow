@@ -1,3 +1,7 @@
+// This is a node.js script that sets up a cross-origin XHR
+// endpoint allowing any webpage to obtain the rendered HTML
+// content for any Wiki page on wiki.mozilla.org.
+
 var http = require('http');
 const WIKI_DOMAIN = 'wiki.mozilla.org';
 
