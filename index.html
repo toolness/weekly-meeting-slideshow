@@ -38,7 +38,10 @@ a:hover {
 </style>
 <script src="jquery.js"></script>
 <script>
-function parseWeeklyUpdate(doc) {
+// Massage the flat HTML produced by MediaWiki rendering into
+// one where each section/subsection is contained in its own
+// div.
+function massageWeeklyUpdate(doc) {
   $("img, video", doc).remove();
 
   var updates = $('<div class="updates"></div>');
@@ -102,15 +105,20 @@ function showUpdate(date) {
 
   var url = 'http://labs.toolness.com:8291/WeeklyUpdates/' + date;
   jQuery.get(url, function(html) {
-    var updates = parseWeeklyUpdate($("#response").html(html));
+    var updates = massageWeeklyUpdate($("#response").html(html));
     $("#response").remove();
+
+    // In the future, we can show massaged information about
+    // speakers, but for now just remove the table.
     updates.find("#S_Speakers").remove();
+    
+    // Just ignore the meeting video for now.
     updates.find("#Video_for_today\\.27s_meeting").remove();
 
     var mainSection;
     var slides = [];
     
-    updates.find(".section").each(function() {
+    updates.find(".section").each(function slideFromSection() {
       var header = $(this).find(":header:first");
       var subheader = header.text().trim();
 
@@ -129,6 +137,9 @@ function showUpdate(date) {
       }
     });
 
+    // Here we start an automated slideshow.
+
+    const SLIDE_DELAY_MS = 5000;  // We need to increase this.
     var currSlide = 0;
     
     function nextSlide() {
@@ -141,7 +152,7 @@ function showUpdate(date) {
         window.clearInterval(intervalID);
     }
 
-    var intervalID = window.setInterval(nextSlide, 5000);
+    var intervalID = window.setInterval(nextSlide, SLIDE_DELAY_MS);
     
     nextSlide();
   });
@@ -150,6 +161,7 @@ function showUpdate(date) {
 $(window).ready(function() {
   var date = window.location.hash.slice(1);
   if (date.length == 0)
+    // The oldest weekly meeting on the Wiki.
     date = '2006-03-27';
   showUpdate(date);
 });
