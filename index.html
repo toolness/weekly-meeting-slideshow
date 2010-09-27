@@ -100,7 +100,7 @@ function showUpdate(date) {
 
   document.title = title;
 
-  var url = 'http://localhost:8080/WeeklyUpdates/' + date;
+  var url = 'http://labs.toolness.com:8291/WeeklyUpdates/' + date;
   jQuery.get(url, function(html) {
     var updates = parseWeeklyUpdate($("#response").html(html));
     $("#response").remove();
