@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="author" content="Atul Varma">
+<title>Weekly Meeting Slideshow</title>
+<!-- Date: 2010-09-26 -->
+<style>
+body {
+  width: 40em;
+  margin: 0 auto;
+  font-family: Baskerville;
+}
+
+a {
+  color: inherit;
+}
+
+a:hover {
+  background: #f0f0f0;
+}
+
+b, h1, h2 {
+  font-weight: normal;
+  font-style: italic;
+}
+
+#response {
+  display: none;
+}
+
+.section {
+}
+
+ul {
+  list-style-type: none;
+}
+</style>
+<script src="jquery.js"></script>
+<script>
+function parseWeeklyUpdate(doc) {
+  $("img, video", doc).remove();
+
+  var updates = $('<div class="updates"></div>');
+
+  function doSection(heading) {
+    var section = $('<div class="section"></div>');
+    var lvl = parseInt(heading.nodeName.slice(1));
+    var selArray = [];
+    for (var i = 1; i <= lvl; i++)
+      selArray.push('h' + i);
+    var contents = $(heading).nextUntil(selArray.join(', '));
+    var nextLvl = 'h' + (lvl + 1);
+    var subsections = contents.filter(nextLvl);
+
+    section.append($(heading).clone());
+    if (subsections.length) {
+      subsections.each(function() {
+        section.append(doSection(this));
+      });
+    } else
+      section.append(contents.clone());
+
+    section.attr("id", "S_" + $(heading).find(".mw-headline").attr("id"));
+    if (section.children().length > 1)
+      return section;
+    else
+      return $();
+  }
+
+  doc.children("h1").each(function() {
+    updates.append(doSection(this));
+  });
+
+  return updates;
+}
+
+const MONTHS = [
+  'January', 'February', 'March', 'April', 'May', 'June',
+  'July', 'August', 'September', 'October', 'November',
+  'December'
+];
+
+function showUpdate(date) {
+  var parts = date.match(/(\d+)-(\d+)-(\d+)/);
+  var year = parts[1];
+  var month = parts[2];
+  var dayOfMonth = parts[3];
+  var realDate = new Date(year, month, dayOfMonth);
+  var title = "The Mozilla Weekly Meeting for " +
+              MONTHS[realDate.getMonth()] +
+              " " + realDate.getDate() + ", " +
+              realDate.getFullYear();
+  var heading = $('<h1 class="title"></h1>');
+
+  document.title = title;
+  heading.text(title);
+  $(document.body).append(heading);
+
+  var url = 'http://localhost:8080/WeeklyUpdates/' + date;
+  jQuery.get(url, function(html) {
+    var updates = parseWeeklyUpdate($("#response").html(html));
+    $("#response").remove();
+    updates.find("#S_Speakers").remove();
+    updates.find("#Video_for_today\\.27s_meeting").remove();
+    $(document.body).append(updates);
+  });
+}
+
+$(window).ready(function() {
+  var date = window.location.hash.slice(1);
+  if (date.length == 0)
+    date = '2006-03-27';
+  showUpdate(date);
+});
+</script>
+<div id="response"></div>
