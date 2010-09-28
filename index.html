@@ -43,6 +43,14 @@ a:hover {
 // div.
 function massageWeeklyUpdate(doc) {
   $("img, video", doc).remove();
+  
+  var tempId = 0;
+  $("p > b:only-child").each(function() {
+    var header = $('<h3><span class="mw-headline"></span></h3>');
+    header.find(".mw-headline").text($(this).text());
+    header.find(".mw-headline").attr("id", "h3-" + tempId++);
+    $(this.parentNode).replaceWith(header);
+  });
 
   var updates = $('<div class="updates"></div>');
 
@@ -53,7 +61,7 @@ function massageWeeklyUpdate(doc) {
     for (var i = 1; i <= lvl; i++)
       selArray.push('h' + i);
     var contents = $(heading).nextUntil(selArray.join(', '));
-    var nextLvl = 'h' + (lvl + 1);
+    var nextLvl = 'h' + (lvl + 1) + ", h" + (lvl + 2);
     var subsections = contents.filter(nextLvl);
     var headingText = $(heading).text().trim();
 
@@ -127,7 +135,7 @@ function showUpdate(date) {
       if ($(this).find(".section").length > 0) {
         mainSection = subheader;
       } else {
-        if (header.get(0).nodeName == "H2")
+        if (header.get(0).nodeName.match(/H2|H3/))
           subheader = mainSection + " - " + subheader;
         var slide = $("#templates div.slide.normal").clone();
         slide.find(".header").text(title);
