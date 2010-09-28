@@ -64,10 +64,10 @@ body {
   width: 100%;
   overflow: hidden;
   -webkit-transition-property: opacity, visibility;
-  -webkit-transition-duration: 0.2s, 0.2s;
+  -webkit-transition-duration: 1.0s, 1.0s;
   -webkit-transition-timing-function: ease-out, ease-out;
   -moz-transition-property: opacity, visibility;
-  -moz-transition-duration: 0.2s, 0.2s;
+  -moz-transition-duration: 1.0s, 1.0s;
   -moz-transition-timing-function: ease-out, ease-out;
 }
 
