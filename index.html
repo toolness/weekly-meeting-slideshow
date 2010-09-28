@@ -44,7 +44,7 @@ function massageWeeklyUpdate(doc) {
   $("img, video", doc).remove();
   
   var tempId = 0;
-  $("p > b:only-child").each(function() {
+  $("p > b:only-child", doc).each(function() {
     var header = $('<h3><span class="mw-headline"></span></h3>');
     header.find(".mw-headline").text($(this).text());
     header.find(".mw-headline").attr("id", "h3-" + tempId++);
@@ -60,9 +60,11 @@ function massageWeeklyUpdate(doc) {
     for (var i = 1; i <= lvl; i++)
       selArray.push('h' + i);
     var contents = $(heading).nextUntil(selArray.join(', '));
-    var nextLvl = 'h' + (lvl + 1) + ", h" + (lvl + 2);
-    var subsections = contents.filter(nextLvl);
+    var subsections = contents.filter('h' + (lvl + 1));
     var headingText = $(heading).text().trim();
+
+    if (!subsections.length)
+      subsections = contents.filter('h' + (lvl + 2));
 
     section.attr("id", $(heading).find(".mw-headline").attr("id"));
     $(heading).text(headingText);
