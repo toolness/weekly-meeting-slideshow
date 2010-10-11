@@ -37,7 +37,27 @@ a:hover {
 }
 </style>
 <script src="jquery.js"></script>
+<script src="interactive-slides.js"></script>
 <script>
+function parseQueryString() {
+  var qs = {};
+  if (location.search && location.search[0] == '?') {
+    var pairs = location.search.slice(1).split("&");
+    pairs.forEach(function(pair) {
+      var keyval = pair.split("=");
+      // TODO: Unescape?
+      qs[keyval[0]] = keyval[1];
+    });
+  }
+  return {
+    get: function get(name, defaultValue) {
+      if (name in qs)
+        return qs[name];
+      return defaultValue;
+    }
+  };
+}
+
 // Massage the flat HTML produced by MediaWiki rendering into
 // one where each section/subsection is contained in its own
 // div.
@@ -106,7 +126,7 @@ if(typeof(String.prototype.trim) === "undefined")
     };
 }
 
-function showUpdate(date) {
+function showUpdate(date, slidesDiv, cb) {
   var parts = date.match(/(\d+)-(\d+)-(\d+)/);
   var realDate = new Date(parts[1], parts[2], parts[3]);
   var title = "The Week of " +
@@ -118,7 +138,7 @@ function showUpdate(date) {
   var url = 'http://labs.toolness.com:8291/WeeklyUpdates/' + date;
   jQuery.get(url, function(html) {
     var updates = massageWeeklyUpdate($("#response").html(html));
-    $("#response").remove();
+    $("#response").empty();
 
     // In the future, we can show massaged information about
     // speakers, but for now just remove the table.
@@ -128,13 +148,14 @@ function showUpdate(date) {
     updates.find("#Video_for_today\\.27s_meeting").remove();
 
     var mainSection;
-    var slides = [];
-    
+
+    $(slidesDiv).empty();
+
     updates.find(".section").each(function slideFromSection() {
       var header = $(this).find(":header:first");
       var subheader = header.text();
 
-      if ($(this).find(".section").length > 0) {
+      if ($(this).find(".section").length) {
         mainSection = subheader;
       } else {
         if (header.get(0).nodeName.match(/H2|H3/))
@@ -144,39 +165,55 @@ function showUpdate(date) {
         slide.find(".subheader").text(subheader);
         header.remove();
         slide.find(".main").append($(this).children());
-        $(document.body).append(slide);
-        slides.push(slide);
+        $(slidesDiv).append(slide);
       }
     });
 
-    // Here we start an automated slideshow.
-
-    const SLIDE_DELAY_MS = 10000;  // We may need to increase this.
-    var currSlide = 0;
-    
-    function nextSlide() {
-      slides[currSlide].addClass("selected");
-      if (currSlide > 0)
-        slides[currSlide - 1].removeClass("selected");
-      currSlide++;
-      if (currSlide == slides.length)
-        window.clearInterval(intervalID);
-    }
-
-    var intervalID = window.setInterval(nextSlide, SLIDE_DELAY_MS);
-    
-    nextSlide();
+    cb(slidesDiv);
   });
 }
 
-$(window).ready(function() {
-  var date = window.location.hash.slice(1);
-  if (date.length == 0)
-    // The oldest weekly meeting on the Wiki.
-    date = '2006-03-27';
-  showUpdate(date);
-});
+function showAutomatedSlideshow(slides, cb) {
+  // Here we start an automated slideshow.
+
+  const SLIDE_DELAY_MS = 1000;  // We may need to increase this.
+  var currSlide = 0;
+  var kids = slides.children();
+
+  function nextSlide() {
+    $(kids.get(currSlide)).addClass("selected");
+    if (currSlide)
+      $(kids.get(currSlide - 1)).removeClass("selected");
+    currSlide++;
+    if (currSlide == kids.length) {
+      window.clearInterval(intervalID);
+      window.setTimeout(cb, SLIDE_DELAY_MS);
+    }
+  }
+
+  var intervalID = window.setInterval(nextSlide, SLIDE_DELAY_MS);
+
+  nextSlide();
+}
+
+function fetchAndShowSlides() {
+  var query = parseQueryString();
+  var date = query.get('date', '2006-03-27');
+  showUpdate(date, $("#slides"), function(slides) {
+    if (query.get('interactive', '0') == '0')
+      showAutomatedSlideshow($(slides), fetchAndShowSlides);
+    else {
+      // TODO: This is ugly and surely there's a better solution.
+      var slideNodeList = document.querySelectorAll("#slides .slide");
+      showInteractiveSlideshow(slideNodeList);
+    }
+  });
+}
+
+$(window).ready(fetchAndShowSlides);
 </script>
+<div id="slides">
+</div>
 <div id="templates">
   <div class="normal slide"> 
     <div class="content"> 

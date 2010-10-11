@@ -8,8 +8,7 @@ onclick = function(event) {
     editSource();
 };
 
-onload = function() {
-  var allSlides = document.querySelectorAll(".slide");
+function showInteractiveSlideshow(allSlides) {
   var currSlide;
 
   function $(sel) {
@@ -41,8 +40,10 @@ onload = function() {
     var date = $(".title.slide .date");
 
     each(".normal.slide", function() {
-      this.appendChild(date.cloneNode(true));
-      this.appendChild(footer.cloneNode(true));
+      if (date)
+        this.appendChild(date.cloneNode(true));
+      if (footer)
+        this.appendChild(footer.cloneNode(true));
     });
 
     each(".slide", function(i) {
@@ -151,5 +152,7 @@ onload = function() {
   addFooters();
 
   document.body.style.display = "block";
-  document.title = $(".title.slide .header").textContent;
+  var header = $(".title.slide .header");
+  if (header)
+    document.title = header.textContent;
 };
