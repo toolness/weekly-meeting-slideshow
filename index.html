@@ -198,7 +198,7 @@ function showAutomatedSlideshow(slides, msPerSlide, cb) {
 function fetchAndShowSlides() {
   var query = parseQueryString();
   var date = query.get('date', '2006-03-27');
-  var msPerSlide = parseInt(query.get('delay', '10000'));
+  var msPerSlide = parseInt(query.get('delay', '10')) * 1000;
   showUpdate(date, $("#slides"), function(slides) {
     if (query.get('interactive', '0') == '0')
       showAutomatedSlideshow($(slides), msPerSlide, fetchAndShowSlides);
