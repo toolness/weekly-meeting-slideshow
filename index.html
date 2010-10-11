@@ -173,10 +173,9 @@ function showUpdate(date, slidesDiv, cb) {
   });
 }
 
-function showAutomatedSlideshow(slides, cb) {
+function showAutomatedSlideshow(slides, msPerSlide, cb) {
   // Here we start an automated slideshow.
 
-  const SLIDE_DELAY_MS = 1000;  // We may need to increase this.
   var currSlide = 0;
   var kids = slides.children();
 
@@ -187,11 +186,11 @@ function showAutomatedSlideshow(slides, cb) {
     currSlide++;
     if (currSlide == kids.length) {
       window.clearInterval(intervalID);
-      window.setTimeout(cb, SLIDE_DELAY_MS);
+      window.setTimeout(cb, msPerSlide);
     }
   }
 
-  var intervalID = window.setInterval(nextSlide, SLIDE_DELAY_MS);
+  var intervalID = window.setInterval(nextSlide, msPerSlide);
 
   nextSlide();
 }
@@ -199,9 +198,10 @@ function showAutomatedSlideshow(slides, cb) {
 function fetchAndShowSlides() {
   var query = parseQueryString();
   var date = query.get('date', '2006-03-27');
+  var msPerSlide = parseInt(query.get('delay', '10000'));
   showUpdate(date, $("#slides"), function(slides) {
     if (query.get('interactive', '0') == '0')
-      showAutomatedSlideshow($(slides), fetchAndShowSlides);
+      showAutomatedSlideshow($(slides), msPerSlide, fetchAndShowSlides);
     else {
       // TODO: This is ugly and surely there's a better solution.
       var slideNodeList = document.querySelectorAll("#slides .slide");
