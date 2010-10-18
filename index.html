@@ -1,226 +1,52 @@
 <!DOCTYPE html>
 <meta charset="utf-8">
 <meta name="author" content="Atul Varma">
-<title>Weekly Meeting Slideshow</title>
-<!-- Date: 2010-09-26 -->
-<link rel="stylesheet" href="screen.css">
-<base target="new">
-<style>
-#templates, #response {
-  display: none;
-}
-
-a {
-  color: inherit;
-}
-
-a:hover {
-  background: #f0f0f0;
-}
-
-.main {
-  font-size: 18pt;
-}
-
-.main b {
-  font-weight: normal;
-  background: #ffffe1;
-}
-
-.main ul {
-  list-style-type: none;
-}
-
-.main ul, .main li {
-  padding-top: 0.25em;
-  padding-bottom: 0.25em;
-}
-</style>
-<script src="jquery.js"></script>
-<script src="interactive-slides.js"></script>
-<script>
-function parseQueryString() {
-  var qs = {};
-  if (location.search && location.search[0] == '?') {
-    var pairs = location.search.slice(1).split("&");
-    pairs.forEach(function(pair) {
-      var keyval = pair.split("=");
-      // TODO: Unescape?
-      qs[keyval[0]] = keyval[1];
-    });
-  }
-  return {
-    get: function get(name, defaultValue) {
-      if (name in qs)
-        return qs[name];
-      return defaultValue;
-    }
-  };
-}
-
-// Massage the flat HTML produced by MediaWiki rendering into
-// one where each section/subsection is contained in its own
-// div.
-function massageWeeklyUpdate(doc) {
-  $("img, video", doc).remove();
+<title>Weekly Meeting Slideshow Form</title>
+<!-- Date: 2010-10-18 -->
+<style type="text/css" media="screen">
+  @import "uni-form.css";
   
-  var tempId = 0;
-  $("p > b:only-child", doc).each(function() {
-    var header = $('<h3><span class="mw-headline"></span></h3>');
-    header.find(".mw-headline").text($(this).text());
-    header.find(".mw-headline").attr("id", "h3-" + tempId++);
-    $(this.parentNode).replaceWith(header);
-  });
-
-  var updates = $('<div class="updates"></div>');
-
-  function doSection(heading) {
-    var section = $('<div class="section"></div>');
-    var lvl = parseInt(heading.nodeName.slice(1));
-    var selArray = [];
-    for (var i = 1; i <= lvl; i++)
-      selArray.push('h' + i);
-    var contents = $(heading).nextUntil(selArray.join(', '));
-    var subsections = contents.filter('h' + (lvl + 1));
-    var headingText = $(heading).text().trim();
-
-    if (!subsections.length)
-      subsections = contents.filter('h' + (lvl + 2));
-
-    section.attr("id", $(heading).find(".mw-headline").attr("id"));
-    $(heading).text(headingText);
-    section.append($(heading).clone());
-    if (subsections.length) {
-      subsections.each(function() {
-        section.append(doSection(this));
-      });
-    } else
-      section.append(contents.clone());
-
-    if (section.children().length > 1)
-      return section;
-    else
-      return $();
+  body {
+    width: 40em;
+    margin: 0 auto;
+    font-family: Helvetica, sans-serif;
+    font-size: 10pt;
   }
-
-  doc.children("h1").each(function() {
-    updates.append(doSection(this));
-  });
-
-  return updates;
-}
-
-const MONTHS = [
-  'January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November',
-  'December'
-];
-
-// Taken from:
-// http://stackoverflow.com/questions/1418050/string-strip-for-javascript
-if(typeof(String.prototype.trim) === "undefined")
-{
-    String.prototype.trim = function() 
-    {
-        return String(this).replace(/^\s+|\s+$/g, '');
-    };
-}
-
-function showUpdate(date, slidesDiv, cb) {
-  var parts = date.match(/(\d+)-(\d+)-(\d+)/);
-  var realDate = new Date(parts[1], parts[2], parts[3]);
-  var title = "The Week of " +
-              MONTHS[realDate.getMonth() - 1] + " " +
-              realDate.getDate() + ", " + realDate.getFullYear();
-
-  document.title = title;
-
-  var url = 'http://labs.toolness.com:8291/WeeklyUpdates/' + date;
-  jQuery.get(url, function(html) {
-    var updates = massageWeeklyUpdate($("#response").html(html));
-    $("#response").empty();
-
-    // In the future, we can show massaged information about
-    // speakers, but for now just remove the table.
-    updates.find("#Speakers").remove();
-    
-    // Just ignore the meeting video for now.
-    updates.find("#Video_for_today\\.27s_meeting").remove();
-
-    var mainSection;
-
-    $(slidesDiv).empty();
-
-    updates.find(".section").each(function slideFromSection() {
-      var header = $(this).find(":header:first");
-      var subheader = header.text();
-
-      if ($(this).find(".section").length) {
-        mainSection = subheader;
-      } else {
-        if (header.get(0).nodeName.match(/H2|H3/))
-          subheader = mainSection + " - " + subheader;
-        var slide = $("#templates div.slide.normal").clone();
-        slide.find(".header").text(title);
-        slide.find(".subheader").text(subheader);
-        header.remove();
-        slide.find(".main").append($(this).children());
-        $(slidesDiv).append(slide);
-      }
-    });
-
-    cb(slidesDiv);
-  });
-}
-
-function showAutomatedSlideshow(slides, msPerSlide, cb) {
-  // Here we start an automated slideshow.
-
-  var currSlide = 0;
-  var kids = slides.children();
-
-  function nextSlide() {
-    $(kids.get(currSlide)).addClass("selected");
-    if (currSlide)
-      $(kids.get(currSlide - 1)).removeClass("selected");
-    currSlide++;
-    if (currSlide == kids.length) {
-      window.clearInterval(intervalID);
-      window.setTimeout(cb, msPerSlide);
-    }
+  
+  a {
+    color: black;
   }
-
-  var intervalID = window.setInterval(nextSlide, msPerSlide);
-
-  nextSlide();
-}
-
-function fetchAndShowSlides() {
-  var query = parseQueryString();
-  var date = query.get('date', '2006-03-27');
-  var msPerSlide = parseInt(query.get('delay', '10')) * 1000;
-  showUpdate(date, $("#slides"), function(slides) {
-    if (query.get('interactive', '0') == '0')
-      showAutomatedSlideshow($(slides), msPerSlide, fetchAndShowSlides);
-    else {
-      // TODO: This is ugly and surely there's a better solution.
-      var slideNodeList = document.querySelectorAll("#slides .slide");
-      showInteractiveSlideshow(slideNodeList);
-    }
-  });
-}
-
-$(window).ready(fetchAndShowSlides);
-</script>
-<div id="slides">
-</div>
-<div id="templates">
-  <div class="normal slide"> 
-    <div class="content"> 
-      <div class="header"></div> 
-      <div class="subheader"></div> 
-      <div class="main"></div> 
+  
+  a:hover {
+    background: yellow;
+  }
+</style>
+<link href="default.uni-form.css" title="Default Style" media="screen" 
+      rel="stylesheet"/>
+<h1>Weekly Meeting Slideshow Builder</h1>
+<form action="slides.html" class="uniForm">
+  <fieldset>
+    <div class="ctrlHolder">
+      <label for="date">Weekly Meeting Date</label>
+      <input id="date" name="date" value="2006-03-27" size="35" class="textInput" type="text">
+      <p class="formHint">The date of the meeting, in <tt>yyyy-mm-dd</tt> format. To see a list of available dates, check out <a href="https://wiki.mozilla.org/WeeklyUpdates" target="new">the list</a> on the Mozilla Wiki.</p>
     </div>
-  </div>
-</div>
-<div id="response"></div>
+  
+    <div class="ctrlHolder">
+      <label for="delay">Slide Duration</label>
+      <input id="delay" name="delay" value="10" size="35" class="textInput" type="text">
+      <p class="formHint">Number of seconds to show each slide when in non-interactive mode.</p>
+    </div>
+  
+    <div class="ctrlHolder">
+      <p class="label">Special Features</p>
+      <ul class="blockLabels">
+        <li><label for="interactive"><input id="interactive" name="interactive" type="checkbox"> Interactive</label></li>
+      </ul>
+      <p class="formHint">Use interactive mode if you want to navigate the slides yourself using arrow keys. Otherwise, the slides will advance automatically and loop forever.</p>
+    </div>
+
+    <div class="buttonHolder"><button type="submit" class="primaryAction">Submit</button></div>
+
+  </fieldset>
+</form>
