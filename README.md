@@ -16,7 +16,8 @@ This is potentially useful for two purposes:
   [Jono]: http://twitter.com/jonoxia
   [Air Mozilla]: http://air.mozilla.com/
 
-Note that the code is currently very hacked-together and doesn't do a lot of things that it ought to, such as:
+Note that the code is currently very hacked-together and doesn't do a lot of things that it ought to.
 
-  * Allowing manual control of slide movement.
-  * Actually providing a reasonable amount of time to read a slide's content before moving on to the next one.
+The form is provided by [Uni-Form][].
+
+  [Uni-Form]: http://sprawsm.com/uni-form/
