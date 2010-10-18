@@ -9,6 +9,12 @@ http.createServer(function(req, res) {
   var wiki = http.createClient(443, WIKI_DOMAIN, true);
   var parts = require('url').parse(req.url);
   var title = encodeURIComponent(parts.pathname.slice(1));
+
+  wiki.on('error', function(ex) {
+    console.log("Error when fetching " + req.url);
+    console.log(ex.stack);
+  });
+
   var wikiReq = wiki.request('GET', '/index.php?title=' + title +
                              '&action=render',
                              {'host': WIKI_DOMAIN});
