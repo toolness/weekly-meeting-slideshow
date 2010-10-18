@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<meta charset="utf-8">
+<meta name="author" content="Atul Varma">
+<title>Weekly Meeting Slideshow Form</title>
+<!-- Date: 2010-10-18 -->
+<style type="text/css" media="screen">
+  @import "uni-form.css";
+  
+  body {
+    width: 40em;
+    margin: 0 auto;
+    font-family: Helvetica, sans-serif;
+    font-size: 10pt;
+  }
+  
+  a {
+    color: black;
+  }
+  
+  a:hover {
+    background: yellow;
+  }
+</style>
+<link href="default.uni-form.css" title="Default Style" media="screen" 
+      rel="stylesheet"/>
+<h1>Weekly Meeting Slideshow Builder</h1>
+<form action="index.html" class="uniForm">
+  <fieldset>
+    <div class="ctrlHolder">
+      <label for="date">Weekly Meeting Date</label>
+      <input id="date" name="date" value="2006-03-27" size="35" class="textInput" type="text">
+      <p class="formHint">The date of the meeting, in <tt>yyyy-mm-dd</tt> format. To see a list of available dates, check out <a href="https://wiki.mozilla.org/WeeklyUpdates" target="new">the list</a> on the Mozilla Wiki.</p>
+    </div>
+  
+    <div class="ctrlHolder">
+      <label for="delay">Slide Duration</label>
+      <input id="delay" name="delay" value="10" size="35" class="textInput" type="text">
+      <p class="formHint">Number of seconds to show each slide when in non-interactive mode.</p>
+    </div>
+  
+    <div class="ctrlHolder">
+      <p class="label">Special Features</p>
+      <ul class="blockLabels">
+        <li><label for="interactive"><input id="interactive" name="interactive" type="checkbox"> Interactive</label></li>
+      </ul>
+      <p class="formHint">Use interactive mode if you want to navigate the slides yourself using arrow keys. Otherwise, the slides will advance automatically and loop forever.</p>
+    </div>
+
+    <div class="buttonHolder"><button type="submit" class="primaryAction">Submit</button></div>
+
+  </fieldset>
+</form>
