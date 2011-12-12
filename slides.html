@@ -129,8 +129,9 @@ if(typeof(String.prototype.trim) === "undefined")
 function showUpdate(date, slidesDiv, cb) {
   var parts = date.match(/(\d+)-(\d+)-(\d+)/);
   var realDate = new Date(parts[1], parts[2], parts[3]);
+  var month = realDate.getMonth() - 1;
   var title = "The Week of " +
-              MONTHS[realDate.getMonth() - 1] + " " +
+              MONTHS[month >= 0 ? month : 11] + " " +
               realDate.getDate() + ", " + realDate.getFullYear();
 
   document.title = title;
