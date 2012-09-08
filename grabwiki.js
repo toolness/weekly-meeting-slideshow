@@ -5,6 +5,7 @@
 var http = require('http');
 var https = require('https');
 const WIKI_DOMAIN = 'wiki.mozilla.org';
+const PORT = process.env['PORT'] || 8291;
 
 http.createServer(function(req, res) {
   var parts = require('url').parse(req.url);
@@ -30,4 +31,6 @@ http.createServer(function(req, res) {
     console.log("Error when fetching " + req.url);
     console.log(ex.stack);
   });
-}).listen(8291);
+}).listen(PORT, function() {
+  console.log("Listening on port " + PORT + ".");
+});

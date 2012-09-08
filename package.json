@@ -1,0 +1,12 @@
+{
+  "name": "moz-cors-grabwiki",
+  "version": "0.0.1",
+  "author": "Atul Varma <varmaa@gmail.com>",
+  "description": "Mozilla wiki CORS proxy.",
+  "dependencies": {},
+  "engines": {
+    "node": "0.8.x",
+    "npm": "1.1.x"
+  },
+  "license": "MIT"
+}
